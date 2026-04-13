@@ -92,6 +92,70 @@ const normalizeSessionToken = (response: unknown) => {
   return null;
 };
 
+const normalizeLocalUserSession = (authUser: unknown, claims: unknown): SessionPayload => {
+  const user = authUser && typeof authUser === "object" ? authUser : {};
+  const metadata =
+    "user_metadata" in user &&
+    user.user_metadata &&
+    typeof user.user_metadata === "object"
+      ? user.user_metadata
+      : {};
+  const tokenClaims =
+    claims && typeof claims === "object" ? claims : {};
+
+  const groups =
+    "groups" in tokenClaims && Array.isArray(tokenClaims.groups)
+      ? tokenClaims.groups.map((item) => String(item))
+      : [];
+
+  const nameCandidates = [
+    "name" in metadata ? metadata.name : "",
+    "nickName" in metadata ? metadata.nickName : "",
+    "username" in metadata ? metadata.username : "",
+    "name" in tokenClaims ? tokenClaims.name : "",
+    "email" in user ? user.email : "",
+    "phone" in user ? user.phone : "",
+  ]
+    .map((item) => String(item || "").trim())
+    .filter(Boolean);
+
+  return {
+    user: {
+      id: String(
+        ("sub" in tokenClaims ? tokenClaims.sub : "") ||
+          ("user_id" in tokenClaims ? tokenClaims.user_id : "") ||
+          ("id" in user ? user.id : "") ||
+          "",
+      ),
+      name: nameCandidates[0] || "已登录用户",
+      email: String(
+        ("email" in user ? user.email : "") ||
+          ("email" in tokenClaims ? tokenClaims.email : "") ||
+          "",
+      ),
+      phone: String(
+        ("phone" in user ? user.phone : "") ||
+          ("phone_number" in tokenClaims ? tokenClaims.phone_number : "") ||
+          "",
+      ),
+      avatarUrl: String(
+        ("picture" in metadata ? metadata.picture : "") ||
+          ("avatarUrl" in metadata ? metadata.avatarUrl : "") ||
+          ("picture" in tokenClaims ? tokenClaims.picture : "") ||
+          "",
+      ),
+      groups,
+      isAnonymous: Boolean(
+        ("is_anonymous" in user ? user.is_anonymous : false) ||
+          ("scope" in tokenClaims ? tokenClaims.scope === "anonymous" : false),
+      ),
+    },
+    isAdmin: Boolean(
+      "is_system_admin" in tokenClaims ? tokenClaims.is_system_admin : false,
+    ),
+  };
+};
+
 const hasAuthCallbackHint = () => {
   if (typeof window === "undefined") {
     return false;
@@ -160,8 +224,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    const payload = await fetchSession(nextAccessToken, deviceId);
-    applySession(nextAccessToken, payload);
+    try {
+      const payload = await fetchSession(nextAccessToken, deviceId);
+      applySession(nextAccessToken, payload);
+      return;
+    } catch {
+      const { auth } = await loadAuthModule();
+      const [userResult, claimsResult] = await Promise.all([
+        auth.getUser().catch(() => null),
+        auth.getClaims().catch(() => null),
+      ]);
+
+      const fallbackPayload = normalizeLocalUserSession(
+        userResult?.data?.user,
+        claimsResult?.data?.claims,
+      );
+      applySession(nextAccessToken, fallbackPayload);
+    }
   };
 
   const restoreSessionFromAuth = async () => {

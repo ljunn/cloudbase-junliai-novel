@@ -29,10 +29,70 @@ interface WorkspaceContextValue {
 const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
 
 export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
-  const { accessToken, deviceId, isAuthenticated } = useAuth();
+  const { accessToken, deviceId, isAuthenticated, session } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [bootstrap, setBootstrap] = useState<BootstrapPayload | null>(null);
+
+  const buildFallbackBootstrap = useCallback((): BootstrapPayload | null => {
+    if (!session) {
+      return null;
+    }
+
+    return {
+      dashboard: {
+        metrics: [
+          {
+            label: "创作中作品",
+            value: "0",
+            hint: "后端数据暂时不可用，稍后重试会自动刷新。",
+            status: "pending",
+          },
+          {
+            label: "累计章节",
+            value: "0",
+            hint: "当前仅恢复了 CloudBase 登录态。",
+            status: "pending",
+          },
+          {
+            label: "累计字数",
+            value: "0 字",
+            hint: "等待工作台数据恢复后会自动更新。",
+            status: "pending",
+          },
+          {
+            label: "最近 AI 生成",
+            value: "0",
+            hint: "当前还无法读取生成历史。",
+            status: "pending",
+          },
+        ],
+        recentProjects: [],
+        pendingChapters: [],
+        drafts: [],
+        recentGenerations: [],
+      },
+      works: [],
+      templates: [],
+      trash: [],
+      profile: {
+        displayName: session.user.name || "已登录用户",
+        email: session.user.email || "",
+        phone: session.user.phone || "",
+        avatarUrl: session.user.avatarUrl || "",
+        planName: "已登录",
+        coinBalance: 0,
+        usageSummary: "工作台数据暂时不可用，稍后会自动恢复。",
+        preferredModel: "hunyuan-2.0-instruct-20251111",
+        defaultVoice: "强情节、稳叙事、网文可读性优先",
+        preferences: {
+          autoSummary: true,
+          autoVersioning: true,
+          compactEditor: false,
+        },
+      },
+    };
+  }, [session]);
 
   const refreshBootstrap = useCallback(async () => {
     if (!accessToken) {
@@ -47,12 +107,19 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
     try {
       const payload = await fetchBootstrap(accessToken, deviceId);
       setBootstrap(payload);
+      setError("");
     } catch (fetchError) {
-      setError(fetchError instanceof Error ? fetchError.message : "加载工作台失败");
+      const fallback = buildFallbackBootstrap();
+      if (fallback) {
+        setBootstrap(fallback);
+        setError("");
+      } else {
+        setError(fetchError instanceof Error ? fetchError.message : "加载工作台失败");
+      }
     } finally {
       setLoading(false);
     }
-  }, [accessToken, deviceId]);
+  }, [accessToken, buildFallbackBootstrap, deviceId]);
 
   useEffect(() => {
     if (!isAuthenticated) {
