@@ -22,8 +22,11 @@ export const appConfig = {
     [
       "https://junliai.com",
       "https://fanqie-xinshu-front-4cjw9c4ef031-1257305037.tcloudbaseapp.com",
+      "https://6661-fanqie-xinshu-front-4cjw9c4ef031-1257305037.tcb.qcloud.la",
       "http://127.0.0.1:5173",
       "http://localhost:5173",
+      "http://127.0.0.1:4173",
+      "http://localhost:4173",
     ].join(",")
   )
     .split(",")
