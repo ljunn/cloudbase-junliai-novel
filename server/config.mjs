@@ -12,7 +12,7 @@ export const TABLES = {
 export const appConfig = {
   envId: process.env.ENV_ID || "fanqie-xinshu-front-4cjw9c4ef031",
   region: process.env.REGION || "ap-shanghai",
-  publicBasePath: process.env.APP_BASE_PATH || "/novel",
+  publicBasePath: "/novel",
   frontendUrl: process.env.FRONTEND_URL || "https://junliai.com/novel/",
   aiProvider: process.env.AI_PROVIDER || "hunyuan-exp",
   aiModel:
