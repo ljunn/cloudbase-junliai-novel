@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { Copy, FolderArchive, Plus, Trash2 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { useMatch, useNavigate } from "react-router-dom";
 import { useAuth } from "@/auth/AuthContext";
 import { EmptyState } from "@/components/EmptyState";
 import { ErrorState } from "@/components/ErrorState";
 import LoadingState from "@/components/LoadingState";
+import NewWorkDialog from "@/components/NewWorkDialog";
 import PageHeading from "@/components/PageHeading";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ const statusMap = {
 
 const WorksPage = () => {
   const navigate = useNavigate();
+  const createWorkMatch = useMatch("/works/new");
   const { accessToken, deviceId } = useAuth();
   const {
     bootstrap,
@@ -41,6 +43,7 @@ const WorksPage = () => {
   } = useWorkspace();
   const [keyword, setKeyword] = useState("");
   const [busyId, setBusyId] = useState("");
+  const isCreateDialogOpen = Boolean(createWorkMatch);
 
   const filteredWorks = useMemo(() => {
     const source = bootstrap?.works || [];
@@ -87,11 +90,9 @@ const WorksPage = () => {
         title="作品、设定和章节都按书管理"
         description="这里不是单轮对话列表，而是你所有长篇项目的入口。进入任意一本书之后，左侧导航会切换成该作品自己的创作结构。"
         actions={
-          <Button asChild>
-            <Link to="/works/new">
-              <Plus className="h-4 w-4" />
-              新建作品
-            </Link>
+          <Button type="button" onClick={() => navigate("/works/new")}>
+            <Plus className="h-4 w-4" />
+            新建作品
           </Button>
         }
       />
@@ -210,12 +211,16 @@ const WorksPage = () => {
           title="当前没有匹配作品"
           description="试试换一个搜索词，或者先新建一本书。后面所有设定、角色和章节都会按作品聚合在这里。"
           action={
-            <Button asChild>
-              <Link to="/works/new">新建作品</Link>
+            <Button type="button" onClick={() => navigate("/works/new")}>
+              新建作品
             </Button>
           }
         />
       )}
+
+      {isCreateDialogOpen ? (
+        <NewWorkDialog onClose={() => navigate("/works")} />
+      ) : null}
     </div>
   );
 };

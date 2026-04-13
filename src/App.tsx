@@ -6,7 +6,6 @@ import AppSidebar from "@/components/AppSidebar";
 import AuthGate from "@/components/AuthGate";
 import LoadingState from "@/components/LoadingState";
 import DashboardPage from "@/pages/DashboardPage";
-import NewWorkPage from "@/pages/NewWorkPage";
 import AssistantPage from "@/pages/AssistantPage";
 import ProfilePage from "@/pages/ProfilePage";
 import TemplatesPage from "@/pages/TemplatesPage";
@@ -40,7 +39,7 @@ const AuthenticatedWorkspace = () => {
           <Routes>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/works" element={<WorksPage />} />
-            <Route path="/works/new" element={<NewWorkPage />} />
+            <Route path="/works/new" element={<WorksPage />} />
             <Route path="/templates" element={<TemplatesPage />} />
             <Route path="/assistant" element={<AssistantPage />} />
             <Route path="/trash" element={<TrashPage />} />

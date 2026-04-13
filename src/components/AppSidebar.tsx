@@ -2,7 +2,6 @@ import { NavLink, useMatch } from "react-router-dom";
 import {
   BookOpenText,
   Bot,
-  BookPlus,
   BrainCircuit,
   Download,
   FileArchive,
@@ -17,17 +16,14 @@ import {
   UsersRound,
   X,
 } from "lucide-react";
-import { useAuth } from "@/auth/AuthContext";
 import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/workspace/WorkspaceContext";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
-import { StatusBadge } from "./StatusBadge";
 
 const globalNavItems = [
   { to: "/", label: "概览", icon: LayoutDashboard },
   { to: "/works", label: "我的作品", icon: Library },
-  { to: "/works/new", label: "新建作品", icon: BookPlus },
   { to: "/templates", label: "模板库", icon: Files },
   { to: "/assistant", label: "AI 助手", icon: Bot },
   { to: "/trash", label: "回收站", icon: FileArchive },
@@ -63,7 +59,6 @@ const AppSidebar = ({
   open: boolean;
   onClose: () => void;
 }) => {
-  const { isAuthenticated, session } = useAuth();
   const { bootstrap } = useWorkspace();
   const workMatch = useMatch("/works/:workId/*");
   const currentWork = bootstrap?.works.find((item) => item.id === workMatch?.params.workId);
@@ -132,20 +127,6 @@ const AppSidebar = ({
                 );
               })}
             </nav>
-
-            <div className="space-y-3 rounded-[1.4rem] border border-border/80 bg-secondary/35 p-4">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-semibold text-foreground">当前会话</p>
-                <StatusBadge status={isAuthenticated ? "success" : "pending"}>
-                  {isAuthenticated ? "已登录" : "待登录"}
-                </StatusBadge>
-              </div>
-              <p className="text-sm leading-6 text-muted-foreground">
-                {isAuthenticated
-                  ? session?.user.name || session?.user.email || "CloudBase 会话"
-                  : "点击顶部按钮跳转 CloudBase /__auth，后续会自动回到当前工作台。"}
-              </p>
-            </div>
           </CardContent>
         </Card>
       </aside>

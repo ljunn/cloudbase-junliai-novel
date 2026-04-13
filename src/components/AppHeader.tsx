@@ -16,12 +16,8 @@ const AppHeader = ({ onOpenSidebar }: { onOpenSidebar: () => void }) => {
       return currentWork.title;
     }
 
-    if (location.pathname === "/works") {
+    if (location.pathname === "/works" || location.pathname === "/works/new") {
       return "我的作品";
-    }
-
-    if (location.pathname === "/works/new") {
-      return "新建作品";
     }
 
     if (location.pathname === "/templates") {
