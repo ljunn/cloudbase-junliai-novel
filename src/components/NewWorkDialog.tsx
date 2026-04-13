@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { useWorkspace } from "@/workspace/WorkspaceContext";
 import type { CreateWorkInput } from "@/types";
 import { Button } from "./ui/button";
-import { Card, CardContent } from "./ui/card";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 
@@ -58,29 +57,29 @@ const NewWorkDialog = ({ onClose }: { onClose: () => void }) => {
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-end justify-center bg-slate-950/45 p-4 backdrop-blur-sm md:items-center"
+      className="fixed inset-0 z-[70] flex items-end justify-center bg-slate-950/52 p-4 md:items-center"
       onClick={onClose}
       role="presentation"
     >
-      <Card
+      <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="new-work-dialog-title"
-        className="max-h-[calc(100vh-2rem)] w-full max-w-6xl overflow-x-hidden overflow-y-auto border-border/70 bg-white/96"
+        className="max-h-[calc(100vh-2rem)] w-full max-w-[920px] overflow-hidden rounded-[1.5rem] border border-border/90 bg-white shadow-[0_28px_90px_rgba(15,23,42,0.28)]"
         onClick={(event) => event.stopPropagation()}
       >
-        <CardContent className="grid gap-6 p-0 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="max-h-[calc(100vh-2rem)] overflow-y-auto">
           <div className="space-y-5 p-6 md:p-8">
             <div className="flex items-start justify-between gap-4 border-b border-border/80 pb-5">
               <div className="space-y-2">
                 <p className="section-label">Create Novel</p>
                 <h2
                   id="new-work-dialog-title"
-                  className="text-3xl font-semibold tracking-tight text-foreground"
+                  className="text-[2rem] font-semibold tracking-tight text-foreground md:text-[2.2rem]"
                 >
                   先定作品，再让 AI 按作品继续写
                 </h2>
-                <p className="max-w-3xl text-base leading-8 text-muted-foreground">
+                <p className="max-w-2xl text-base leading-8 text-muted-foreground">
                   创建作品时就把题材、风格、目标篇幅和叙事视角固定下来。创建完成后，会自动生成可继续修改的基础设定和章节起步结构。
                 </p>
               </div>
@@ -94,6 +93,13 @@ const NewWorkDialog = ({ onClose }: { onClose: () => void }) => {
               >
                 <X className="h-4 w-4" />
               </Button>
+            </div>
+
+            <div className="rounded-[1.25rem] border border-border/80 bg-secondary/35 px-4 py-4">
+              <p className="text-sm font-semibold text-foreground">创建后自动补齐</p>
+              <p className="mt-2 text-sm leading-7 text-muted-foreground">
+                故事设定草稿、主角角色卡、基础世界观条目和一版起步粗纲会一起建好，后面继续在作品里改。
+              </p>
             </div>
 
             <form
@@ -161,7 +167,7 @@ const NewWorkDialog = ({ onClose }: { onClose: () => void }) => {
                 <Textarea
                   value={form.premise}
                   onChange={(event) => updateField("premise", event.target.value)}
-                  className="min-h-[140px]"
+                  className="min-h-[132px]"
                   placeholder="例如：一个被驱逐出王城的铸剑师，为了查清父亲的死因，只能一步步卷进帝国最深的权力裂缝。"
                 />
               </label>
@@ -197,7 +203,7 @@ const NewWorkDialog = ({ onClose }: { onClose: () => void }) => {
 
               {error ? <p className="text-sm text-rose-600">{error}</p> : null}
 
-              <div className="flex flex-wrap items-center justify-end gap-3">
+              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-border/80 pt-5">
                 <Button type="button" variant="outline" onClick={onClose}>
                   取消
                 </Button>
@@ -207,20 +213,8 @@ const NewWorkDialog = ({ onClose }: { onClose: () => void }) => {
               </div>
             </form>
           </div>
-
-          <div className="border-t border-border/80 bg-secondary/35 p-6 lg:border-l lg:border-t-0 lg:p-8">
-            <div className="space-y-4 rounded-[1.75rem] border border-border/80 bg-white/82 p-5">
-              <p className="section-label">创建后自动得到</p>
-              <div className="space-y-3 text-sm leading-7 text-muted-foreground">
-                <p>1. 一份可继续编辑的故事设定草稿</p>
-                <p>2. 一个主角角色卡与基础世界观条目</p>
-                <p>3. 一版粗纲和起始章节结构</p>
-                <p>4. 立即可写的作品工作台入口</p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };
