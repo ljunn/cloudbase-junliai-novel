@@ -40,7 +40,7 @@ const ProfilePage = () => {
         actions={<SaveStatePill state={autosave.state} error={autosave.error} />}
       />
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_360px]">
+      <div className="max-w-5xl">
         <Card className="border-border/70 bg-white/92">
           <CardHeader>
             <CardTitle>账号与创作偏好</CardTitle>
@@ -48,22 +48,7 @@ const ProfilePage = () => {
           <CardContent className="grid gap-5 md:grid-cols-2">
             <label className="space-y-2">
               <span className="text-sm font-semibold text-foreground">显示名称</span>
-              <Input
-                value={form.displayName}
-                onChange={(event) =>
-                  setForm((current) =>
-                    current ? { ...current, displayName: event.target.value } : current,
-                  )
-                }
-              />
-            </label>
-            <label className="space-y-2">
-              <span className="text-sm font-semibold text-foreground">邮箱</span>
-              <Input value={form.email} readOnly />
-            </label>
-            <label className="space-y-2">
-              <span className="text-sm font-semibold text-foreground">手机号</span>
-              <Input value={form.phone} readOnly />
+              <Input value={form.displayName} readOnly />
             </label>
             <label className="space-y-2">
               <span className="text-sm font-semibold text-foreground">偏好模型</span>
@@ -121,30 +106,6 @@ const ProfilePage = () => {
                 <span className="text-sm text-foreground">{label}</span>
               </label>
             ))}
-          </CardContent>
-        </Card>
-
-        <Card className="border-border/70 bg-white/92">
-          <CardHeader>
-            <CardTitle>账户概览</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="rounded-[1.5rem] border border-border/80 bg-secondary/35 p-4">
-              <p className="text-sm text-muted-foreground">当前套餐</p>
-              <p className="mt-2 text-3xl font-semibold text-foreground">
-                {form.planName}
-              </p>
-            </div>
-            <div className="rounded-[1.5rem] border border-border/80 bg-secondary/35 p-4">
-              <p className="text-sm text-muted-foreground">金币余额</p>
-              <p className="mt-2 text-3xl font-semibold text-foreground">
-                {form.coinBalance.toLocaleString("zh-CN")}
-              </p>
-            </div>
-            <div className="rounded-[1.5rem] border border-border/80 bg-secondary/35 p-4">
-              <p className="text-sm text-muted-foreground">使用量统计</p>
-              <p className="mt-2 text-sm leading-7 text-foreground">{form.usageSummary}</p>
-            </div>
           </CardContent>
         </Card>
       </div>
