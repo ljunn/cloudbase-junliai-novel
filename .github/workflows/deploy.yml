@@ -1,0 +1,109 @@
+name: Deploy CloudBase
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-cloudbase-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CI: "true"
+  HOSTING_PATH: ${{ vars.HOSTING_PATH || '/novel' }}
+  NODE_VERSION: ${{ vars.NODE_VERSION || '20' }}
+  FRONTEND_URL: ${{ vars.FRONTEND_URL || 'https://junliai.com/novel/' }}
+  BACKEND_URL: ${{ vars.BACKEND_URL || 'https://junliai-llm-live-230479-6-1257305037.sh.run.tcloudbase.com' }}
+  VITE_API_ORIGIN: ${{ vars.VITE_API_ORIGIN || 'https://junliai-llm-live-230479-6-1257305037.sh.run.tcloudbase.com/novel' }}
+  VITE_APP_BASE_PATH: /novel
+  VITE_LOGIN_ORIGIN: https://junliai.com
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      TCB_SECRET_ID: ${{ secrets.TCB_SECRET_ID || secrets.CLOUDBASE_API_KEY_ID }}
+      TCB_SECRET_KEY: ${{ secrets.TCB_SECRET_KEY || secrets.CLOUDBASE_API_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Resolve CloudBase config
+        id: cloudbase
+        shell: bash
+        run: |
+          node <<'EOF' >> "$GITHUB_OUTPUT"
+          const fs = require("fs");
+          const config = JSON.parse(fs.readFileSync("cloudbaserc.json", "utf8"));
+          process.stdout.write(`env_id=${config.envId || ""}\n`);
+          process.stdout.write(`service_name=${config.cloudrun?.name || ""}\n`);
+          EOF
+
+      - name: Validate deployment config
+        env:
+          TCB_ENV_ID: ${{ secrets.TCB_ENV_ID || secrets.CLOUDBASE_ENV_ID || vars.TCB_ENV_ID || steps.cloudbase.outputs.env_id }}
+          CLOUDRUN_SERVICE_NAME: ${{ steps.cloudbase.outputs.service_name }}
+        shell: bash
+        run: |
+          for name in TCB_SECRET_ID TCB_SECRET_KEY TCB_ENV_ID CLOUDRUN_SERVICE_NAME; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::Missing required deployment config: $name"
+              exit 1
+            fi
+          done
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Prepare CloudRun deploy context
+        run: bash scripts/prepare-cloudrun-context.sh
+
+      - name: Install CloudBase CLI
+        run: npm install -g @cloudbase/cli@3.0.4
+
+      - name: Login to CloudBase
+        run: |
+          tcb login \
+            --apiKeyId "$TCB_SECRET_ID" \
+            --apiKey "$TCB_SECRET_KEY"
+
+      - name: Deploy CloudRun backend
+        env:
+          TCB_ENV_ID: ${{ secrets.TCB_ENV_ID || secrets.CLOUDBASE_ENV_ID || vars.TCB_ENV_ID || steps.cloudbase.outputs.env_id }}
+          CLOUDRUN_SERVICE_NAME: ${{ steps.cloudbase.outputs.service_name }}
+        run: |
+          tcb cloudrun deploy \
+            --env-id "$TCB_ENV_ID" \
+            --serviceName "$CLOUDRUN_SERVICE_NAME" \
+            --source "$GITHUB_WORKSPACE/.cloudrun-deploy-temp" \
+            --port 3000 \
+            --force
+
+      - name: Deploy static hosting
+        env:
+          TCB_ENV_ID: ${{ secrets.TCB_ENV_ID || secrets.CLOUDBASE_ENV_ID || vars.TCB_ENV_ID || steps.cloudbase.outputs.env_id }}
+        run: |
+          tcb hosting deploy \
+            "$GITHUB_WORKSPACE/dist" \
+            "$HOSTING_PATH" \
+            --env-id "$TCB_ENV_ID"
+
+      - name: Deployment summary
+        run: |
+          echo "Frontend: $FRONTEND_URL"
+          echo "Backend:  $BACKEND_URL"

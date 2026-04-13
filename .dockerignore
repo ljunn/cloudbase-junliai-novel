@@ -1,0 +1,7 @@
+node_modules
+cloudfunctions
+.agents
+.codex
+rules
+.git
+npm-debug.log
