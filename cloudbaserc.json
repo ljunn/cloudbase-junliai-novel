@@ -3,7 +3,7 @@
   "envId": "fanqie-xinshu-front-4cjw9c4ef031",
   "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
   "cloudrun": {
-    "name": "junliai-llm-live"
+    "name": "junli-ai-novel-live"
   },
   "app": {
     "buildCommand": "npm run build",

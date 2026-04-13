@@ -28,8 +28,8 @@
 - CloudBase 环境 ID：`fanqie-xinshu-front-4cjw9c4ef031`
 - 环境别名：`junli-ai`
 - 区域：`ap-shanghai`
-- CloudRun 服务：`junliai-llm-live`
-- CloudRun 默认域名：`https://junliai-llm-live-230479-6-1257305037.sh.run.tcloudbase.com`
+- CloudRun 服务：`junli-ai-novel-live`
+- CloudRun 默认域名：`https://junli-ai-novel-live-230479-6-1257305037.sh.run.tcloudbase.com`
 - 静态托管发布目录：`/novel`
 
 ## 目录结构
@@ -168,7 +168,7 @@ curl http://127.0.0.1:3000/novel/api/health
 ### 前端
 
 - `VITE_APP_BASE_PATH=/novel`
-- `VITE_API_ORIGIN=https://junliai-llm-live-230479-6-1257305037.sh.run.tcloudbase.com/novel`
+- `VITE_API_ORIGIN=https://junli-ai-novel-live-230479-6-1257305037.sh.run.tcloudbase.com/novel`
 - `VITE_LOGIN_ORIGIN=https://junliai.com`
 - `VITE_ENV_ID=fanqie-xinshu-front-4cjw9c4ef031`
 - `VITE_REGION=ap-shanghai`
@@ -216,7 +216,7 @@ curl http://127.0.0.1:3000/novel/api/health
 - `NODE_VERSION=20`
 - `FRONTEND_URL=https://junliai.com/novel/`
 - `BACKEND_URL=https://junliai-llm-live-230479-6-1257305037.sh.run.tcloudbase.com`
-- `VITE_API_ORIGIN=https://junliai-llm-live-230479-6-1257305037.sh.run.tcloudbase.com/novel`
+- `VITE_API_ORIGIN=https://junli-ai-novel-live-230479-6-1257305037.sh.run.tcloudbase.com/novel`
 
 ## CloudBase 控制台入口
 
