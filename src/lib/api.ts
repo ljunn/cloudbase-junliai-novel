@@ -87,6 +87,19 @@ const request = async <T>(path: string, init?: RequestOptions): Promise<T> => {
       signal,
     });
 
+    const contentType = response.headers.get("content-type") || "";
+
+    if (!contentType.toLowerCase().includes("application/json")) {
+      const responseText = await response.text();
+      const isHtmlResponse = /^\s*</.test(responseText);
+
+      throw new Error(
+        isHtmlResponse
+          ? `创作 API 返回了 HTML 页面，请求地址是 ${path}。当前前端很可能没有命中 CloudRun API，而是打到了静态站点。`
+          : `创作 API 返回了非 JSON 响应，请求地址是 ${path}。`,
+      );
+    }
+
     const payload = (await response.json()) as T & { message?: string };
 
     if (!response.ok) {
@@ -97,6 +110,15 @@ const request = async <T>(path: string, init?: RequestOptions): Promise<T> => {
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
       throw new Error("请求超时，请稍后重试");
+    }
+
+    if (
+      error instanceof TypeError &&
+      /Failed to fetch/i.test(error.message || "")
+    ) {
+      throw new Error(
+        "无法连接创作 API。请检查当前访问域名是否已加入 CORS_ALLOWED_ORIGINS，或确认 VITE_API_ORIGIN 可访问。",
+      );
     }
 
     throw error;

@@ -12,7 +12,7 @@ import { repository } from "./repository.mjs";
 
 const app = express();
 const port = Number(process.env.PORT || 3000);
-const frontendUrl = new URL(appConfig.frontendUrl);
+const publicBaseUrl = new URL(appConfig.publicBaseUrl);
 const publicBasePath = (() => {
   const value = String(appConfig.publicBasePath || "/").trim();
   if (!value || value === "/") {
@@ -23,21 +23,69 @@ const publicBasePath = (() => {
 })();
 const allowedOrigins = new Set([
   ...appConfig.corsAllowedOrigins,
-  frontendUrl.origin,
+  publicBaseUrl.origin,
 ]);
 
-const buildFrontendRedirectUrl = (requestUrl) => {
-  const incomingUrl = new URL(requestUrl, "http://novel.local");
-  const redirectUrl = new URL(frontendUrl.toString());
-  const basePath = redirectUrl.pathname.endsWith("/")
-    ? redirectUrl.pathname
-    : `${redirectUrl.pathname}/`;
-  const requestPath =
-    incomingUrl.pathname === "/" ? "" : incomingUrl.pathname.replace(/^\/+/, "");
+const isPrivateIpv4Host = (hostname) => {
+  if (/^127(?:\.\d{1,3}){3}$/.test(hostname)) {
+    return true;
+  }
 
-  redirectUrl.pathname = `${basePath}${requestPath}`.replace(/\/{2,}/g, "/");
-  redirectUrl.search = incomingUrl.search;
-  return redirectUrl.toString();
+  if (/^10(?:\.\d{1,3}){3}$/.test(hostname)) {
+    return true;
+  }
+
+  if (/^192\.168(?:\.\d{1,3}){2}$/.test(hostname)) {
+    return true;
+  }
+
+  const parts = hostname.split(".");
+  if (parts.length !== 4 || parts.some((part) => !/^\d{1,3}$/.test(part))) {
+    return false;
+  }
+
+  const [first, second] = parts.map(Number);
+  return first === 172 && second >= 16 && second <= 31;
+};
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) {
+    return false;
+  }
+
+  if (allowedOrigins.has(origin)) {
+    return true;
+  }
+
+  try {
+    const url = new URL(origin);
+    const { protocol, hostname } = url;
+
+    if (protocol !== "http:" && protocol !== "https:") {
+      return false;
+    }
+
+    if (
+      protocol === "http:" &&
+      (hostname === "localhost" ||
+        hostname === "[::1]" ||
+        isPrivateIpv4Host(hostname))
+    ) {
+      return true;
+    }
+
+    if (
+      protocol === "https:" &&
+      (hostname.endsWith(".tcloudbaseapp.com") ||
+        hostname.endsWith(".tcb.qcloud.la"))
+    ) {
+      return true;
+    }
+  } catch {
+    return false;
+  }
+
+  return false;
 };
 
 const serializeContextText = (detail, chapter, payload) => {
@@ -144,7 +192,7 @@ app.use("/api", (request, response, next) => {
     return;
   }
 
-  if (!allowedOrigins.has(origin)) {
+  if (!isAllowedOrigin(origin)) {
     response.status(403).json({ message: "当前来源未被允许访问创作 API。" });
     return;
   }
@@ -175,14 +223,9 @@ app.get("/api/health", (_request, response) => {
 
 app.use(async (request, response, next) => {
   if (!request.path.startsWith("/api")) {
-    if (request.method === "GET" || request.method === "HEAD") {
-      response.redirect(
-        302,
-        buildFrontendRedirectUrl(request.originalUrl || request.url || "/"),
-      );
-      return;
-    }
-    next();
+    response.status(404).json({
+      message: "当前 CloudRun 服务只提供 /novel/api/* 接口，不承载前端页面。",
+    });
     return;
   }
 

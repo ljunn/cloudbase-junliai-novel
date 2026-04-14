@@ -16,6 +16,14 @@
 - 数据库：CloudBase 关系型数据库
 - AI：`@cloudbase/node-sdk` `app.ai()` 文本生成
 
+## 公开入口约定
+
+- 正式入口：`https://junliai.com/novel/`
+- 正式页面路由：`https://junliai.com/novel/#/...`
+- 正式 API：`https://junliai.com/novel/api/*`
+- `https://junliai.com/novel/works` 这类无 `#` 深链不在支持范围内，返回 404 属于预期行为
+- CloudRun 默认域名和 CloudBase 静态托管原始域名仅用于运维排查，不作为正式访问入口
+
 ## 视觉与交互约束
 
 - 字体与视觉 token 复用 `cloudbase-junliai-blog`
@@ -168,7 +176,7 @@ curl http://127.0.0.1:3000/novel/api/health
 ### 前端
 
 - `VITE_APP_BASE_PATH=/novel`
-- `VITE_API_ORIGIN=https://junli-ai-novel-live-230479-6-1257305037.sh.run.tcloudbase.com/novel`
+- `VITE_API_ORIGIN=<可选覆盖项，默认留空并走同源 /novel/api>`
 - `VITE_LOGIN_ORIGIN=https://junliai.com`
 - `VITE_ENV_ID=fanqie-xinshu-front-4cjw9c4ef031`
 - `VITE_REGION=ap-shanghai`
@@ -180,7 +188,8 @@ curl http://127.0.0.1:3000/novel/api/health
 - `REGION=ap-shanghai`
 - `APP_BASE_PATH=/novel`
 - `FRONTEND_URL=https://junliai.com/novel/`
-- `CORS_ALLOWED_ORIGINS=https://junliai.com,https://fanqie-xinshu-front-4cjw9c4ef031-1257305037.tcloudbaseapp.com,http://127.0.0.1:5173`
+- `PUBLIC_BASE_URL=https://junliai.com/novel`
+- `CORS_ALLOWED_ORIGINS=https://junliai.com,https://www.junliai.com,https://fanqie-xinshu-front-4cjw9c4ef031-1257305037.tcloudbaseapp.com,http://127.0.0.1:5173`
 - `AI_PROVIDER=hunyuan-exp`
 - `AI_MODEL=hunyuan-2.0-instruct-20251111`
 - `CLOUDBASE_APIKEY=<CloudBase Server API Key>`
@@ -216,7 +225,14 @@ curl http://127.0.0.1:3000/novel/api/health
 - `NODE_VERSION=20`
 - `FRONTEND_URL=https://junliai.com/novel/`
 - `BACKEND_URL=https://junliai-llm-live-230479-6-1257305037.sh.run.tcloudbase.com`
-- `VITE_API_ORIGIN=https://junli-ai-novel-live-230479-6-1257305037.sh.run.tcloudbase.com/novel`
+- `VITE_API_ORIGIN` 仅在需要显式覆盖 API 基址时配置，默认留空
+- `PUBLIC_BASE_URL=https://junliai.com/novel`
+
+## 常见排查
+
+- 如果浏览器里创建作品时报 `Failed to fetch`，优先检查当前前端来源是否被后端 CORS 放行。
+- `https://www.junliai.com`、CloudBase 静态托管域名和常见本地开发地址默认已放行；如果你换了自定义域名，记得同步追加到 `CORS_ALLOWED_ORIGINS`。
+- 如果你直接打开 `https://junliai.com/novel/works` 看到 404，不要按路径路由排查；当前项目是 `HashRouter`，正确地址是 `https://junliai.com/novel/#/works`。
 
 ## CloudBase 控制台入口
 

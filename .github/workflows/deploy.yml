@@ -20,7 +20,7 @@ env:
   NODE_VERSION: ${{ vars.NODE_VERSION || '20' }}
   FRONTEND_URL: ${{ vars.FRONTEND_URL || 'https://junliai.com/novel/' }}
   BACKEND_URL: ${{ vars.BACKEND_URL || 'https://junli-ai-novel-live-230479-6-1257305037.sh.run.tcloudbase.com' }}
-  VITE_API_ORIGIN: ${{ vars.VITE_API_ORIGIN || 'https://junli-ai-novel-live-230479-6-1257305037.sh.run.tcloudbase.com/novel' }}
+  VITE_API_ORIGIN: ${{ vars.VITE_API_ORIGIN }}
   VITE_APP_BASE_PATH: /novel
   VITE_LOGIN_ORIGIN: https://junliai.com
 

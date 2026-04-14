@@ -21,9 +21,10 @@ export const APP_CLIENT_ID =
   import.meta.env.VITE_CLOUDBASE_CLIENT_ID || APP_ENV_ID;
 export const APP_BASE_PATH_HINT =
   import.meta.env.VITE_APP_BASE_PATH || DEFAULT_APP_BASE_PATH;
-export const APP_API_ORIGIN = String(import.meta.env.VITE_API_ORIGIN || "")
+const configuredApiOrigin = String(import.meta.env.VITE_API_ORIGIN || "")
   .trim()
   .replace(/\/+$/, "");
+export const APP_API_ORIGIN = configuredApiOrigin;
 export const APP_LOGIN_ORIGIN = String(
   import.meta.env.VITE_LOGIN_ORIGIN ||
     (typeof window !== "undefined"

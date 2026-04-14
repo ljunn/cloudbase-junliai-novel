@@ -68,7 +68,7 @@ const AppHeader = ({ onOpenSidebar }: { onOpenSidebar: () => void }) => {
             <h1 className="text-xl font-semibold text-foreground">{sectionTitle}</h1>
             <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
               <ShieldCheck className="h-3.5 w-3.5" />
-              /novel
+              /novel/#/...
             </span>
           </div>
         </div>

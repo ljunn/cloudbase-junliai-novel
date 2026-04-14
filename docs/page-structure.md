@@ -1,5 +1,7 @@
 # 页面结构清单
 
+正式入口固定为 `https://junliai.com/novel/`，页面深链固定为 `https://junliai.com/novel/#/...`。`/novel/works` 这类无 `#` 的路径不在支持范围内。
+
 | 页面 | 路由 | 作用 | 是否核心链路 | 依赖数据 |
 | --- | --- | --- | --- | --- |
 | 工作台 | `/novel/#/` | 汇总最近作品、待续写章节、草稿与最近生成记录，作为登录后第一屏 | 是 | `dashboard`、`works`、`ai_generations`、`chapters` |
